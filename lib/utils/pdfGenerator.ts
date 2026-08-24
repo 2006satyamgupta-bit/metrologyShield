@@ -123,7 +123,7 @@ export class PdfAuditGenerator {
     doc.setTextColor(15, 23, 42);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(analysis.productName || "Packaged Commodity", margin + 58, y + 9);
+    doc.text(analysis.productName || "Unnamed Package Label", margin + 58, y + 9);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);

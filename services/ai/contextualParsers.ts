@@ -219,42 +219,42 @@ export class ContextualParsers {
       }
     }
 
-    // Final fallback: based on classified category
-    if (!detectedName || isBlacklisted(detectedName)) {
-      if (category === "FOOTWEAR") detectedName = "Footwear / Shoes";
-      else if (category === "APPAREL") detectedName = "Apparel / Garments";
-      else if (category === "FOOD_BEVERAGE") detectedName = "Packaged Food Commodity";
-      else if (category === "COSMETICS_PERSONAL_CARE") detectedName = "Personal Care Product";
-      else if (category === "ELECTRONICS") detectedName = "Electronic Appliance / Accessory";
-      else detectedName = "Packaged Commodity";
-      confidence = 75;
-      reason = `Inferred default product category description based on ${CATEGORY_METADATA_MAP[category].label}`;
+    // 4. If nothing detected from text, do NOT invent or guess synthetic placeholders
+    if (detectedName && isBlacklisted(detectedName)) {
+      detectedName = null;
+      confidence = 0;
+      snippet = "";
+      reason = "No valid product name found (only statutory headers identified)";
     }
 
     const status: FieldStatus =
       detectedName && confidence >= 90
         ? "DETECTED"
-        : detectedName
+        : detectedName && confidence >= 60
           ? "UNCERTAIN"
           : "MISSING";
 
-    const createField = (fieldName: string, label: string, desc: string): ExtractedFieldItem => ({
+    const createField = (fieldName: string, label: string, val: string | null, stat: FieldStatus, conf: number, desc: string): ExtractedFieldItem => ({
       fieldName,
       label,
-      value: detectedName,
-      status,
-      confidence: detectedName ? confidence : 0,
+      value: val,
+      status: stat,
+      confidence: val ? conf : 0,
       isUserCorrected: false,
       sourceTextSnippet: snippet ? `Snippet: "${snippet}"` : undefined,
       extractionMethod: "CONTEXTUAL_PARSER",
-      reasonForSelection: detectedName ? reason : "No clear product name or generic commodity declaration identified.",
+      reasonForSelection: val ? reason : "No clear product name or generic commodity declaration identified in OCR.",
       legalReference: "Rule 6(1)(b)",
       description: desc,
     });
 
+    const genericVal = commodityMatch ? commodityMatch[0].toUpperCase() : detectedName;
+    const genericStatus: FieldStatus = genericVal ? (commodityMatch ? "DETECTED" : status) : "MISSING";
+    const genericConf = commodityMatch ? 95 : confidence;
+
     return {
-      productName: createField("productName", "Product Name / Brand", "Name of the product or brand display"),
-      genericName: createField("genericName", "Generic or Common Name", "Statutory common or generic description of commodity"),
+      productName: createField("productName", "Product Name / Brand", detectedName, status, confidence, "Name of the product or brand display"),
+      genericName: createField("genericName", "Generic or Common Name", genericVal, genericStatus, genericConf, "Statutory common or generic description of commodity"),
     };
   }
 
@@ -930,93 +930,99 @@ export class ContextualParsers {
   }
 
   /**
-   * 5. Dynamic Manufacturer & Marketer Parser
+   * 5. Dynamic Manufacturer & Marketer Parser (Universal across all product categories)
    */
   static parseManufacturer(lines: OcrLineBox[], rawText: string): {
     manufacturerName: ExtractedFieldItem;
     manufacturerAddress: ExtractedFieldItem;
   } {
     const cleanText = this.sanitizeText(rawText);
+    const mfrAnchorRegex = /\b(manufactured\s*(?:and|&)?\s*(?:packed)?\s*by|marketed\s*by|mfd\s*(?:and\s*pkd)?\s*by|produced\s*by|mfg\s*by|packed\s*by|imported\s*by)\b/i;
 
-    // Footwear / Arvind Fashions case
-    if (
-      cleanText.includes("PARAMOUNT") ||
-      cleanText.includes("FRARAMINIK") ||
-      cleanText.includes("DUPARC") ||
-      cleanText.includes("ARVIND FASHIONS")
-    ) {
-      return {
-        manufacturerName: {
-          fieldName: "manufacturerName",
-          label: "Manufacturer / Packed By",
-          value: "PARAMOUNT GRUPO DUPARC TRARY",
-          status: "DETECTED",
-          confidence: 96,
-          isUserCorrected: false,
-          sourceTextSnippet: "Nonafacured and Packed By: PARAMOUNT GRUPO DUPARC TRARY",
-          extractionMethod: "CONTEXTUAL_PARSER",
-          reasonForSelection: "Extracted legal manufacturing and packaging entity.",
-          legalReference: "Rule 6(1)(a)",
-          description: "Name of the legal manufacturing entity",
-        },
-        manufacturerAddress: {
-          fieldName: "manufacturerAddress",
-          label: "Marketed By & Registered Postal Address",
-          value: "ARVIND FASHIONS, 17, M.G. ROAD, BANGALORE, KARNATAKA - 560001",
-          status: "DETECTED",
-          confidence: 98,
-          isUserCorrected: false,
-          sourceTextSnippet: "Marketed By: 17, M.G. ROAD, BANGALORE, KARNATAKA - 560001",
-          extractionMethod: "CONTEXTUAL_PARSER",
-          reasonForSelection: "Verified complete marketing postal address with 6-digit PIN code (560001).",
-          legalReference: "Rule 6(1)(a)",
-          description: "Complete physical postal address with PIN code",
-        },
-      };
-    }
-
-    // Default dynamic manufacturer search
-    const mfrAnchorRegex = /\b(manufactured\s*(?:and|&)?\s*(?:packed)?\s*by|marketed\s*by|mfd\s*by|produced\s*by|mfg\s*by|packed\s*by)\b/i;
     let mfrNameCandidate: string | null = null;
     let mfrAddressCandidate: string | null = null;
+    let detectedSnippet: string | undefined = undefined;
 
-    lines.forEach((line, idx) => {
+    // 1. Line-by-line structured scan
+    for (let idx = 0; idx < lines.length; idx++) {
+      const line = lines[idx];
       const lineText = this.sanitizeText(line.text);
-      if (!lineText) return;
+      if (!lineText) continue;
 
       if (mfrAnchorRegex.test(lineText)) {
+        detectedSnippet = lineText;
+        const inlineEntity = lineText.replace(mfrAnchorRegex, "").replace(/^[:\s-]+/, "").trim();
+
         const addressLines: string[] = [];
-        for (let j = idx; j < Math.min(lines.length, idx + 4); j++) {
+        if (inlineEntity.length >= 3 && !/^(see|at|refer|the|above|consumer|mrp|pkg)/i.test(inlineEntity)) {
+          addressLines.push(inlineEntity);
+        }
+
+        // Collect subsequent address lines (up to 4 lines down)
+        for (let j = idx + 1; j < Math.min(lines.length, idx + 5); j++) {
           const nextText = this.sanitizeText(lines[j].text);
           if (
             nextText &&
             !nextText.toLowerCase().includes("customer care") &&
+            !nextText.toLowerCase().includes("consumer complaints") &&
             !nextText.toLowerCase().includes("commodity") &&
-            !nextText.toLowerCase().includes("mrp")
+            !nextText.toLowerCase().includes("mrp") &&
+            !nextText.toLowerCase().includes("net qty")
           ) {
             addressLines.push(nextText);
+          } else {
+            break;
           }
         }
 
         if (addressLines.length > 0) {
-          mfrNameCandidate = addressLines[0].replace(mfrAnchorRegex, "").replace(/^[:\s-]+/, "").trim();
+          mfrNameCandidate = addressLines[0];
           mfrAddressCandidate = addressLines.join(", ");
+          break;
         }
       }
-    });
+    }
 
-    const hasPin = Boolean(cleanText.match(/\b([1-9][0-9]{5})\b/));
+    // 2. Fallback to rawText regex block extraction if not found line-by-line
+    if (!mfrNameCandidate) {
+      const blockMatch = cleanText.match(
+        /(?:Manufactured\s*(?:and|&)?\s*(?:Packed)?\s*By|Marketed\s*By|Mfd\s*By|Mfg\s*By|Packed\s*By)[:\s]+([^\n\r]+(?:\n[^\n\r]+){0,3})/i
+      );
+      if (blockMatch) {
+        const rawLines = blockMatch[1]
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(
+            (l) =>
+              l.length > 0 &&
+              !/^(customer|care|mrp|commodity|net|email|phone|tel)/i.test(l)
+          );
+        if (rawLines.length > 0) {
+          mfrNameCandidate = rawLines[0].replace(/^[:\s-]+/, "");
+          mfrAddressCandidate = rawLines.join(", ");
+          detectedSnippet = blockMatch[0];
+        }
+      }
+    }
+
+    // 3. Check for valid 6-digit postal PIN code in text
+    const pinMatch = cleanText.match(/\b([1-9][0-9]{5})\b/);
+    const hasPin = Boolean(pinMatch);
+
+    const nameStatus: FieldStatus = mfrNameCandidate && mfrNameCandidate.length >= 3 ? "DETECTED" : "MISSING";
+    const addressStatus: FieldStatus = mfrAddressCandidate && mfrAddressCandidate.length >= 5 ? "DETECTED" : "MISSING";
 
     return {
       manufacturerName: {
         fieldName: "manufacturerName",
         label: "Manufacturer / Marketer Name",
         value: mfrNameCandidate,
-        status: mfrNameCandidate ? "DETECTED" : "MISSING",
+        status: nameStatus,
         confidence: mfrNameCandidate ? 92 : 0,
         isUserCorrected: false,
+        sourceTextSnippet: detectedSnippet ? `Snippet: "${detectedSnippet.slice(0, 100)}"` : undefined,
         extractionMethod: "CONTEXTUAL_PARSER",
-        reasonForSelection: mfrNameCandidate ? `Manufacturer entity identified from '${mfrNameCandidate}'` : "No manufacturer name found in OCR.",
+        reasonForSelection: mfrNameCandidate ? `Manufacturer entity identified from '${mfrNameCandidate}'` : "No manufacturer declaration detected in OCR.",
         legalReference: "Rule 6(1)(a)",
         description: "Name of the legal manufacturing or marketing entity",
       },
@@ -1024,11 +1030,14 @@ export class ContextualParsers {
         fieldName: "manufacturerAddress",
         label: "Manufacturer Complete Postal Address",
         value: mfrAddressCandidate,
-        status: mfrAddressCandidate ? "DETECTED" : "MISSING",
+        status: addressStatus,
         confidence: mfrAddressCandidate ? (hasPin ? 95 : 85) : 0,
         isUserCorrected: false,
+        sourceTextSnippet: mfrAddressCandidate ? `Snippet: "${mfrAddressCandidate.slice(0, 120)}"` : undefined,
         extractionMethod: "CONTEXTUAL_PARSER",
-        reasonForSelection: mfrAddressCandidate ? `Complete postal address with PIN verification (${hasPin ? "PIN Verified" : "Standard"}).` : "No manufacturer postal address found in OCR.",
+        reasonForSelection: mfrAddressCandidate
+          ? `Complete postal address with PIN verification (${hasPin ? `PIN ${pinMatch?.[0]} Verified` : "Standard"}).`
+          : "No manufacturer postal address detected in OCR.",
         legalReference: "Rule 6(1)(a)",
         description: "Complete physical postal address with PIN code",
       },

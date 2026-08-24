@@ -23,6 +23,28 @@ export class OcrService {
     options?: OcrEngineOptions
   ): Promise<OcrResult> {
     const startTime = Date.now();
+
+    // Guard against empty or invalid input
+    if (
+      !imageSource ||
+      (Buffer.isBuffer(imageSource) && imageSource.length < 10) ||
+      (typeof imageSource === "string" && !fs.existsSync(imageSource))
+    ) {
+      return {
+        id: uuidv4(),
+        analysisId,
+        provider: "FALLBACK",
+        rawText: "",
+        confidence: 0,
+        wordCount: 0,
+        languageDetected: "unknown",
+        processingTimeMs: Date.now() - startTime,
+        words: [],
+        lines: [],
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     const provider = options?.provider || (env.OCR_PROVIDER.toUpperCase() as "TESSERACT");
 
     try {
@@ -43,6 +65,8 @@ export class OcrService {
         wordCount: 0,
         languageDetected: "unknown",
         processingTimeMs: Date.now() - startTime,
+        words: [],
+        lines: [],
         createdAt: new Date().toISOString(),
       };
     }
@@ -54,32 +78,36 @@ export class OcrService {
     startTime: number
   ): Promise<OcrResult> {
     let imageFilePath = "";
+    let isTempFile = false;
 
-    if (typeof imageSource === "string" && fs.existsSync(imageSource)) {
-      imageFilePath = imageSource;
-    } else {
-      const tempDir = path.join(os.tmpdir(), "metroshield_tmp");
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
+    try {
+      if (typeof imageSource === "string" && fs.existsSync(imageSource)) {
+        imageFilePath = imageSource;
+      } else {
+        const tempDir = path.join(os.tmpdir(), "metroshield_tmp");
+        if (!fs.existsSync(tempDir)) {
+          fs.mkdirSync(tempDir, { recursive: true });
+        }
+        imageFilePath = path.join(tempDir, `ocr-${analysisId}.png`);
+        const buffer = Buffer.isBuffer(imageSource) ? imageSource : Buffer.from(imageSource);
+        fs.writeFileSync(imageFilePath, buffer);
+        isTempFile = true;
       }
-      imageFilePath = path.join(tempDir, `ocr-${analysisId}.png`);
-      const buffer = Buffer.isBuffer(imageSource) ? imageSource : Buffer.from(imageSource);
-      fs.writeFileSync(imageFilePath, buffer);
-    }
 
-    // Direct, fast in-process Tesseract execution with timeout guard
-    const recognizePromise = (async (): Promise<OcrResult> => {
-      try {
-        const langPath = path.join(process.cwd(), "public");
+      // Direct in-process Tesseract execution using local trained weights
+      const langPath = path.join(process.cwd(), "public");
+      const hasLocalTessdata = fs.existsSync(path.join(langPath, "eng.traineddata"));
+
+      const recognizePromise = (async (): Promise<OcrResult> => {
         const res = await Tesseract.recognize(imageFilePath, "eng", {
-          langPath: fs.existsSync(path.join(langPath, "eng.traineddata")) ? langPath : undefined,
+          langPath: hasLocalTessdata ? langPath : undefined,
         });
 
         const pageData = res.data as any;
         const rawText = (pageData.text || "").trim();
-        const words = (pageData.words || []).map((w: any) => ({
+        const words: OcrWordBox[] = (pageData.words || []).map((w: any) => ({
           text: w.text,
-          confidence: Math.round(w.confidence || 80),
+          confidence: Math.round(w.confidence || 0),
           bbox: {
             x0: w.bbox?.x0 || 0,
             y0: w.bbox?.y0 || 0,
@@ -90,7 +118,7 @@ export class OcrService {
         const lines = (pageData.lines || []).map((l: any, idx: number) => ({
           lineIndex: idx,
           text: l.text?.trim() || "",
-          confidence: Math.round(l.confidence || 80),
+          confidence: Math.round(l.confidence || 0),
           bbox: {
             x0: l.bbox?.x0 || 0,
             y0: l.bbox?.y0 || 0,
@@ -104,7 +132,7 @@ export class OcrService {
           analysisId,
           provider: "TESSERACT",
           rawText,
-          confidence: Math.round(res.data.confidence || 85),
+          confidence: Math.round(res.data.confidence || (words.length > 0 ? 80 : 0)),
           wordCount: words.length,
           languageDetected: "eng",
           processingTimeMs: Date.now() - startTime,
@@ -112,34 +140,29 @@ export class OcrService {
           lines,
           createdAt: new Date().toISOString(),
         };
-      } catch (err: any) {
-        console.error("Direct Tesseract OCR error:", err);
-        throw err;
-      }
-    })();
+      })();
 
-    const timeoutPromise = new Promise<OcrResult>((resolve) => {
-      setTimeout(() => {
-        console.warn(`OCR timed out after 8s for analysis ${analysisId}, proceeding with fallback`);
-        resolve({
-          id: uuidv4(),
-          analysisId,
-          provider: "FALLBACK",
-          rawText: "Net Quantity: 200 g\nMRP Rs. 150.00 (incl. of all taxes)\nCountry of Origin: India\nMfg Date: 03/2024",
-          confidence: 80,
-          wordCount: 15,
-          languageDetected: "eng",
-          processingTimeMs: Date.now() - startTime,
-          words: [],
-          lines: [],
-          createdAt: new Date().toISOString(),
-        });
-      }, 8000);
-    });
+      // 20-second safety timeout
+      const timeoutPromise = new Promise<OcrResult>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Tesseract OCR timed out after 20s for analysis ${analysisId}`));
+        }, 20000);
+      });
 
-    try {
       return await Promise.race([recognizePromise, timeoutPromise]);
-    } catch {
+    } catch (err: any) {
+      console.warn("Tesseract OCR failed/timed out:", err?.message || err);
+
+      // Attempt Google Vision fallback if API key is configured
+      if (env.OCR_API_KEY && env.OCR_API_KEY.trim() !== "") {
+        try {
+          return await this.runGoogleVisionOcr(imageSource, analysisId, startTime);
+        } catch (gvErr: any) {
+          console.error("Google Vision fallback also failed:", gvErr?.message || gvErr);
+        }
+      }
+
+      // Honest failure result with zero fabricated data
       return {
         id: uuidv4(),
         analysisId,
@@ -147,10 +170,20 @@ export class OcrService {
         rawText: "",
         confidence: 0,
         wordCount: 0,
-        languageDetected: "eng",
+        languageDetected: "unknown",
         processingTimeMs: Date.now() - startTime,
+        words: [],
+        lines: [],
         createdAt: new Date().toISOString(),
       };
+    } finally {
+      if (isTempFile && imageFilePath) {
+        try {
+          fs.unlinkSync(imageFilePath);
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
     }
   }
 

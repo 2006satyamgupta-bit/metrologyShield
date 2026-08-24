@@ -138,7 +138,7 @@ export class AnalysisOrchestrator {
       const finalProductName =
         productName && productName !== "Untitled Package Label"
           ? productName
-          : extractedDeclarations.productName?.value || "Packaged Commodity";
+          : extractedDeclarations.productName?.value || extractedDeclarations.genericName?.value || "Untitled Package Label";
 
       await DatabaseRepository.saveExtractedFields(analysisId, extractedDeclarations);
 
@@ -225,8 +225,9 @@ export class AnalysisOrchestrator {
 
     const productName =
       updatedDeclarations.productName?.value ||
+      updatedDeclarations.genericName?.value ||
       existing.productName ||
-      "Packaged Commodity";
+      "Untitled Package Label";
 
     // 2. Generate updated regulatory advisory
     const advice = await AiAdvisoryService.generateComplianceAdvice(
