@@ -23,7 +23,7 @@ const DEFAULT_USER: UserProfile = {
 };
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
+  user: DEFAULT_USER,
   isLoading: false,
   signIn: async () => ({ success: true }),
   signUp: async () => ({ success: true }),
@@ -32,7 +32,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(DEFAULT_USER);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,10 +42,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (stored) {
         setUser(JSON.parse(stored));
       } else {
-        setUser(null);
+        setUser(DEFAULT_USER);
       }
     } catch {
-      setUser(null);
+      setUser(DEFAULT_USER);
     } finally {
       setIsLoading(false);
     }
