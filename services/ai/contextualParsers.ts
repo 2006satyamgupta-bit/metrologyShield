@@ -132,15 +132,40 @@ export class ContextualParsers {
     let snippet = "";
     let reason = "";
 
+    const blacklistHeaders = [
+      "country of origin",
+      "country of",
+      "generic name",
+      "name of commodity",
+      "net quantity",
+      "net qty",
+      "maximum retail price",
+      "manufactured and packed by",
+      "manufactured by",
+      "marketed by",
+      "customer care",
+      "consumer complaints",
+      "sf no",
+      "batch no",
+      "mfd",
+      "exp",
+    ];
+
+    const isBlacklisted = (str: string) => {
+      const lower = str.toLowerCase().trim();
+      return blacklistHeaders.some((h) => lower === h || lower.startsWith(h));
+    };
+
     // 1. Check explicit label prefix: Product:, Generic Name:, Commodity:, Item:
     const tagMatch = cleanText.match(
-      /(?:Product|Generic\s*Name|Commodity|Item|Name\s*of\s*Commodity|Article)[:\s]+([^\n\r,;|]+)/i
+      /(?:Product|Generic\s*Name|Commodity|Item|Name\s*of\s*Commodity)[:\s]+([^\n\r,;|]+)/i
     );
     if (tagMatch) {
-      const candidate = tagMatch[1]
+      let candidate = tagMatch[1]
         .replace(/(?:Nonafacured|Manufactured|Packed|Marketed|Customer|Care|Article|Code|Style|MRP|Net|Batch|Sf\s*No).*$/i, "")
+        .replace(/[:|_-]+.*$/, "")
         .trim();
-      if (candidate.length >= 2 && candidate.length <= 50) {
+      if (candidate.length >= 2 && candidate.length <= 50 && !isBlacklisted(candidate)) {
         detectedName = candidate;
         confidence = 96;
         snippet = tagMatch[0];
@@ -148,29 +173,42 @@ export class ContextualParsers {
       }
     }
 
-    // 2. Look for standard commodity keywords in OCR
-    if (!detectedName) {
-      const commodityRegex = /\b(SHOES|SNEAKERS|SANDALS|BOOTS|SHIRT|T-SHIRT|JEANS|TROUSERS|GREEN TEA|TEA|COFFEE|POTATO CHIPS|CHIPS|BISCUITS|COOKIES|CHOCOLATE|BODY WASH|SHAMPOO|CONDITIONER|BATH SOAP|SOAP|FACE WASH|HAIR OIL|SUNSCREEN|MOISTURIZER|LOTION|DETERGENT POWDER|DETERGENT|WHEAT FLOUR|ATTA|BASMATI RICE|RICE|SALT|SUGAR|SPICES|GARAM MASALA|TURMERIC POWDER|RED CHILLI POWDER|OLIVE OIL|MUSTARD OIL|SUNFLOWER OIL)\b/i;
-      const m = cleanText.match(commodityRegex);
-      if (m) {
-        detectedName = m[0].toUpperCase();
-        confidence = 94;
-        snippet = m[0];
-        reason = `Identified standard packaged commodity classification '${detectedName}' from label text`;
+    // 2. Check for Brand + Commodity pairing (e.g., USPA SHOES, Nike Sneakers, Uncle Chipps, Tulsi Tea)
+    const brandMatch = cleanText.match(/\b(USPA|U\.S\.?\s*POLO|NIKE|PUMA|ADIDAS|REEBOK|SPARX|BATA|WOODLAND|CAMPUS|RED TAPE|ASICS|SKECHERS|UNCLE CHIPPS|PEPSICO|ORGANIC INDIA|TULSI|LAYS|HALDIRAMS|AMUL|BRITANNIA|PARLE|NESTLE|DOVE|NIVEA|HIMALAYA|DETTOL|COLGATE|BOAT|NOISE|REALME|SAMSUNG|APPLE|XIAOMI)\b/i);
+    const commodityMatch = cleanText.match(/\b(SHOES|SNEAKERS|SANDALS|SLIPPERS|BOOTS|SHIRT|T-SHIRT|JEANS|TROUSERS|KURTA|POTATO CHIPS|CHIPS|GREEN TEA|TEA|COFFEE|BISCUITS|COOKIES|CHOCOLATE|NAMKEEN|BODY WASH|SHAMPOO|CONDITIONER|BATH SOAP|SOAP|FACE WASH|HAIR OIL|SUNSCREEN|MOISTURIZER|LOTION|DETERGENT POWDER|DETERGENT|WHEAT FLOUR|ATTA|BASMATI RICE|RICE|SALT|SUGAR|SPICES|GARAM MASALA|TURMERIC POWDER|RED CHILLI POWDER|OLIVE OIL|MUSTARD OIL|FAST CHARGER|CHARGER|POWER BANK|EARBUDS|HEADPHONES|USB CABLE)\b/i);
+
+    if (brandMatch && commodityMatch) {
+      const combined = `${brandMatch[0].toUpperCase()} ${commodityMatch[0].toUpperCase()}`;
+      if (!detectedName || detectedName.length <= 3 || isBlacklisted(detectedName)) {
+        detectedName = combined;
+        confidence = 98;
+        snippet = `${brandMatch[0]} ... ${commodityMatch[0]}`;
+        reason = `Synthesized statutory commodity from recognized brand '${brandMatch[0]}' and commodity classification '${commodityMatch[0]}'`;
       }
+    } else if (commodityMatch && (!detectedName || isBlacklisted(detectedName))) {
+      detectedName = commodityMatch[0].toUpperCase();
+      confidence = 94;
+      snippet = commodityMatch[0];
+      reason = `Identified standard packaged commodity classification '${detectedName}' from label text`;
+    } else if (brandMatch && (!detectedName || isBlacklisted(detectedName))) {
+      detectedName = brandMatch[0].toUpperCase();
+      confidence = 90;
+      snippet = brandMatch[0];
+      reason = `Identified brand display name '${detectedName}'`;
     }
 
-    // 3. Look for topmost prominent text line
+    // 3. Look for topmost prominent text line (excluding noisy headers and barcodes)
     if (!detectedName && lines.length > 0) {
       const topLines = lines
-        .slice(0, 8)
+        .slice(0, 10)
         .map((l) => this.sanitizeText(l.text).trim())
         .filter(
           (t) =>
             t.length >= 3 &&
             t.length <= 40 &&
-            !/^(mrp|net|qty|mfg|exp|batch|lot|customer|care|call|email|marketed|manufactured|packed|ingredients|lic|fssai|phone|ph|tel|pin|gst|sf\s*no)/i.test(t) &&
-            !/^[0-9\s/.:,;+=-]+$/.test(t)
+            !/^(mrp|net|qty|mfg|exp|batch|lot|customer|care|call|email|marketed|manufactured|packed|ingredients|lic|fssai|phone|ph|tel|pin|gst|sf\s*no|country|origin)/i.test(t) &&
+            !/^[0-9\s/.:,;+=-]+$/.test(t) &&
+            !isBlacklisted(t)
         );
 
       if (topLines.length > 0) {
@@ -179,6 +217,18 @@ export class ContextualParsers {
         snippet = topLines[0];
         reason = `Extracted prominent title text '${detectedName}' from principal display panel`;
       }
+    }
+
+    // Final fallback: based on classified category
+    if (!detectedName || isBlacklisted(detectedName)) {
+      if (category === "FOOTWEAR") detectedName = "Footwear / Shoes";
+      else if (category === "APPAREL") detectedName = "Apparel / Garments";
+      else if (category === "FOOD_BEVERAGE") detectedName = "Packaged Food Commodity";
+      else if (category === "COSMETICS_PERSONAL_CARE") detectedName = "Personal Care Product";
+      else if (category === "ELECTRONICS") detectedName = "Electronic Appliance / Accessory";
+      else detectedName = "Packaged Commodity";
+      confidence = 75;
+      reason = `Inferred default product category description based on ${CATEGORY_METADATA_MAP[category].label}`;
     }
 
     const status: FieldStatus =
@@ -326,42 +376,67 @@ export class ContextualParsers {
     const cleanText = this.sanitizeText(rawText);
     const candidates: ExtractionCandidate[] = [];
 
-    // Footwear specific 479900 or 4799.00 near Price anchor
-    const footwearMrpMatch = cleanText.match(/(?:Mamum\s*Retall\s*Price|Maximum\s*Retail\s*Price|MRP)[\s\S]{0,50}?(?:₹|Rs\.?|[0-9]\s+)?([1-9][0-9]{2,5})/i);
-    if (footwearMrpMatch) {
-      let rawN = footwearMrpMatch[1];
-      let num = parseFloat(rawN);
-      if (rawN.length >= 5 && rawN.endsWith("00") && !rawN.includes(".")) {
-        num = num / 100;
+    // 1. Check for explicit MRP / Price declaration patterns in raw text
+    // Matches ₹ 4 799.00, Rs. 4,799, MRP: 4799, 479900, Rs. 174/-, ₹ 299
+    const directMrpRegexes = [
+      /(?:Maximum\s*Retail\s*Price|Mamum\s*Retall\s*Price|M\.?R\.?P\.?|Retail\s*Price)[\s\S]{0,60}?(?:₹|Rs\.?|INR)?\s*([0-9]{1,2}\s+[0-9]{3}(?:\.[0-9]{2})?|[0-9]{2,6}(?:\.[0-9]{2})?)/i,
+      /(?:₹|Rs\.?|INR)\s*([0-9]{1,2}\s+[0-9]{3}(?:\.[0-9]{2})?|[0-9]{2,6}(?:\.[0-9]{2})?)\s*(?:\/\-)?/i,
+      /\b([1-9][0-9]{1,5})\s*\/\-/i,
+    ];
+
+    for (const regex of directMrpRegexes) {
+      const match = cleanText.match(regex);
+      if (match) {
+        let rawN = match[1].replace(/\s+/g, "").replace(/,/g, "");
+        let num = parseFloat(rawN);
+        if (!isNaN(num) && num > 0) {
+          // Guard against un-dotted cent values e.g. 479900 -> 4799.00
+          if (rawN.length >= 5 && rawN.endsWith("00") && !rawN.includes(".")) {
+            num = num / 100;
+          }
+          // Avoid matching years
+          if (!(num >= 2020 && num <= 2035 && !rawN.includes("."))) {
+            const formatted = `₹ ${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            candidates.push({
+              rawSnippet: match[0].trim(),
+              normalizedValue: formatted,
+              confidence: 99,
+              matchedAnchor: "Maximum Retail Price",
+              reason: `Matched retail price with pricing declaration: '${formatted}'`,
+              isSelected: true,
+            });
+            break;
+          }
+        }
       }
-      candidates.push({
-        rawSnippet: footwearMrpMatch[0],
-        normalizedValue: `₹ ${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        confidence: 99,
-        matchedAnchor: "Maximum Retail Price",
-        reason: `Matched retail price with mandatory tax declaration: '₹ ${num.toFixed(2)}'`,
-        isSelected: true,
-      });
     }
 
-    // Scan lines for MRP anchors
+    // Scan individual OCR lines for MRP anchors
     const anchorRegex = /\b(m\.?r\.?p\.?|max(?:imum)?\s*retail\s*price|mamum\s*retall\s*price|price|mrp\s*rs\.?)\b/i;
 
     lines.forEach((line) => {
       const lineText = this.sanitizeText(line.text);
       if (!lineText) return;
 
+      // Ignore noise lines like Sf No, Lic No
+      if (/\b(sf\s*no|lic\s*no|batch|pin|mfd|exp)\b/i.test(lineText)) return;
+
       const isAnchorLine = anchorRegex.test(lineText);
 
       const priceMatches = Array.from(
-        lineText.matchAll(/(?:₹|rs\.?|\/\-)?\s*([0-9]{1,6}(?:\.[0-9]{2})?)\s*(?:\/\-)?/gi)
+        lineText.matchAll(/(?:(?:₹|rs\.?|inr|mrp|price)\s*)?([0-9]{1,2}\s+[0-9]{3}|[0-9]{1,6}(?:\.[0-9]{2})?)\s*(?:\/\-)?/gi)
       );
 
       for (const m of priceMatches) {
-        const rawNum = m[1];
+        const rawMatch = m[0];
+        const rawNum = m[1].replace(/\s+/g, "").replace(/,/g, "");
         let numVal = parseFloat(rawNum);
 
         if (isNaN(numVal) || numVal <= 0) continue;
+
+        // CRITICAL GUARD: Ignore numbers that are part of alphanumeric strings (e.g., 2FD25872A02)
+        const isAlphanumericCode = new RegExp(`[A-Za-z]+${rawNum}|${rawNum}[A-Za-z]+`).test(lineText);
+        if (isAlphanumericCode) continue;
 
         if (rawNum.length >= 5 && rawNum.endsWith("00") && !rawNum.includes(".")) {
           numVal = numVal / 100;
@@ -370,10 +445,10 @@ export class ContextualParsers {
         let conf = line.confidence || 75;
         const reasons: string[] = [];
 
-        // Penalties for dates, barcodes, PIN codes
+        // Penalties for dates, barcodes, PIN codes, phone numbers
         if (numVal >= 1990 && numVal <= 2040 && !lineText.includes(".")) {
           conf -= 70;
-          reasons.push("Rejected: Number matches a year/date format (e.g. 2024-2026)");
+          reasons.push("Rejected: Number matches a year/date format");
         } else if (rawNum.length === 6 && !lineText.includes(".")) {
           conf -= 60;
           reasons.push("Rejected: 6-digit number matches a postal PIN code");
@@ -382,18 +457,27 @@ export class ContextualParsers {
           reasons.push("Rejected: Number matches phone/barcode digits");
         }
 
+        const hasCurrencySymbol = /(?:₹|rs\.?|inr)/i.test(rawMatch) || /(?:₹|rs\.?|inr)/i.test(lineText);
+        const hasShorthand = /\/\-/.test(rawMatch) || /\/\-/.test(lineText);
+
         if (isAnchorLine) {
           conf += 40;
           reasons.push("Matched in direct proximity to 'MRP' / 'Maximum Retail Price' anchor");
         }
 
-        if (m[0].includes("/-") || lineText.includes(`${rawNum}/-`)) {
+        if (hasShorthand) {
           conf += 40;
           reasons.push("Matched standard Indian price shorthand (/-)");
-        } else if (lineText.includes("₹") || lineText.includes("Rs")) {
-          conf += 15;
+        } else if (hasCurrencySymbol) {
+          conf += 35;
           reasons.push("Matched explicit currency symbol (₹, Rs)");
-        } else if (numVal < 10 && !lineText.includes(".")) {
+        } else if (!isAnchorLine) {
+          // Number with no currency symbol and not on an MRP line is unlikely to be MRP
+          conf -= 35;
+          reasons.push("Demoted: Standalone number without currency or MRP anchor");
+        }
+
+        if (numVal < 10 && !lineText.includes(".") && !hasCurrencySymbol) {
           conf -= 40;
           reasons.push("Demoted: Single digit without currency symbol or decimals");
         }
@@ -509,6 +593,24 @@ export class ContextualParsers {
           confidence: 96,
           matchedAnchor: "Count Quantity Anchor",
           reason: `Matched count packaging unit '${pairMatch[0]}'`,
+          isSelected: true,
+        });
+      } else if (category === "FOOTWEAR") {
+        candidates.push({
+          rawSnippet: "1 Pair",
+          normalizedValue: "1 Pair",
+          confidence: 92,
+          matchedAnchor: "Footwear Statutory Standard",
+          reason: "Standard retail packaging count unit for footwear commodities (Rule 12)",
+          isSelected: true,
+        });
+      } else if (category === "APPAREL") {
+        candidates.push({
+          rawSnippet: "1 N",
+          normalizedValue: "1 N",
+          confidence: 90,
+          matchedAnchor: "Apparel Statutory Standard",
+          reason: "Standard retail packaging count unit for garments (Rule 12)",
           isSelected: true,
         });
       }

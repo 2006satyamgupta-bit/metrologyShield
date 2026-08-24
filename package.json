@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:compliance": "tsx tests/compliance.test.ts",
     "test:pipeline": "tsx tests/pipeline.test.ts",
-    "test": "tsx tests/compliance.test.ts; tsx tests/pipeline.test.ts"
+    "test": "npm run test:compliance && npm run test:pipeline"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

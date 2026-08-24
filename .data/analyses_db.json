@@ -13497,6 +13497,557 @@
         ],
         "summaryNote": "### Legal Metrology Regulatory Notice & Rectification Advice for **WhatsApp Image 2026 08 23 At 12.33.42**\n\n**Overall Risk Level:** NON_COMPLIANT (Statutory Compliance Rating: 60%)\n\n**Key Statutory Non-Compliances Identified:**\n1. **Net Quantity in Standard SI Metric Units** (Rule 6(1)(c) & Rules 11, 12, 13, Legal Metrology (Packaged Commodities) Rules, 2011): Rule 6(1)(c) and Rule 11 mandate declaration of correct net quantity. Omission of net quantity is a primary statutory offence.\n   - **Action Required:** Add explicit declaration: 'Net Quantity: [Value] [Standard Unit (g/kg/ml/l/N/Pair)]'.\n\n2. **Month and Year of Manufacture / Packaging / Import** (Rule 6(1)(d), Legal Metrology (Packaged Commodities) Rules, 2011): Rule 6(1)(d) mandates declaration of the month and year in which the commodity was manufactured or pre-packed.\n   - **Action Required:** Print 'Mfg Date: MM/YYYY' or 'Date of Packaging: MM/YYYY' prominently on the label.\n\n---\n*Notice: Under Section 36 of the Legal Metrology Act, 2009, manufacturing, packing, or selling non-compliant packaged commodities carries penalties starting from ₹25,000 up to ₹1,00,000 or imprisonment for repeat violations. Rectify the above declarations before commercial batch release.*"
       }
+    },
+    "314410f6-5fdb-4017-bc06-6fca942bbf8d": {
+      "id": "314410f6-5fdb-4017-bc06-6fca942bbf8d",
+      "userId": "default-user",
+      "productName": "Screenshot 2026 08 21 At 3.45.35 PM",
+      "status": "COMPLETED",
+      "complianceStatus": "NON_COMPLIANT",
+      "complianceScore": 52,
+      "createdAt": "2026-08-24T18:56:57.419Z",
+      "updatedAt": "2026-08-24T18:57:05.496Z",
+      "labelImage": {
+        "id": "df63a540-4872-407f-88e6-8c7bc893b223",
+        "analysisId": "314410f6-5fdb-4017-bc06-6fca942bbf8d",
+        "fileName": "WhatsApp Image 2026-08-23 at 12.33.42.jpeg",
+        "storagePath": "default-user/314410f6-5fdb-4017-bc06-6fca942bbf8d/df63a540-4872-407f-88e6-8c7bc893b223.jpeg",
+        "mimeType": "image/jpeg",
+        "fileSizeBytes": 80236,
+        "url": "/uploads/314410f6-5fdb-4017-bc06-6fca942bbf8d-df63a540-4872-407f-88e6-8c7bc893b223.jpeg",
+        "createdAt": "2026-08-24T18:56:57.425Z"
+      },
+      "ocrResult": {
+        "id": "9ab4f33c-78a8-43f6-bfa2-5fb802483106",
+        "analysisId": "314410f6-5fdb-4017-bc06-6fca942bbf8d",
+        "provider": "TESSERACT",
+        "rawText": "--- [ PANEL 1: WhatsApp Image 2026-08-23 at 12.33.42.jpeg ] ---\nNet Quantity: 200 g\nMRP Rs. 150.00 (incl. of all taxes)\nCountry of Origin: India\nMfg Date: 03/2024",
+        "confidence": 80,
+        "wordCount": 15,
+        "languageDetected": "eng",
+        "processingTimeMs": 1000,
+        "words": [],
+        "lines": [],
+        "createdAt": "2026-08-24T18:57:05.447Z"
+      },
+      "extractedFields": {
+        "productCategory": "GENERAL_COMMODITY",
+        "productName": {
+          "fieldName": "productName",
+          "label": "Product Name / Brand",
+          "value": "Country of Origin",
+          "status": "UNCERTAIN",
+          "confidence": 78,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"Country of Origin: India\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Extracted prominent title text 'Country of Origin' from principal display panel",
+          "legalReference": "Rule 6(1)(b)",
+          "description": "Name of the product or brand display"
+        },
+        "genericName": {
+          "fieldName": "genericName",
+          "label": "Generic or Common Name",
+          "value": "Country of Origin",
+          "status": "UNCERTAIN",
+          "confidence": 78,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"Country of Origin: India\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Extracted prominent title text 'Country of Origin' from principal display panel",
+          "legalReference": "Rule 6(1)(b)",
+          "description": "Statutory common or generic description of commodity"
+        },
+        "productDescription": {
+          "fieldName": "productDescription",
+          "label": "Product Description & Key Features",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "legalReference": "General Declaration",
+          "description": "Description of commodity features, usage, or specifications"
+        },
+        "ingredients": {
+          "fieldName": "ingredients",
+          "label": "Ingredients / Composition",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "legalReference": "Statutory Food / Cosmetic Standards",
+          "description": "List of ingredients or chemical formulation"
+        },
+        "batchNumber": {
+          "fieldName": "batchNumber",
+          "label": "Batch / Lot / Article Number",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No dedicated batch/lot stamp identifier detected.",
+          "candidates": [],
+          "legalReference": "Packaging Traceability",
+          "description": "Unique batch identification for product tracking"
+        },
+        "fssaiNumber": {
+          "fieldName": "fssaiNumber",
+          "label": "FSSAI / Manufacturing License Number",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No statutory FSSAI or Manufacturing license declaration found.",
+          "candidates": [],
+          "legalReference": "Licensing Standards & FSSAI",
+          "description": "Regulatory license or certification number"
+        },
+        "manufacturerName": {
+          "fieldName": "manufacturerName",
+          "label": "Manufacturer / Marketer Name",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No manufacturer name found in OCR.",
+          "legalReference": "Rule 6(1)(a)",
+          "description": "Name of the legal manufacturing or marketing entity"
+        },
+        "manufacturerAddress": {
+          "fieldName": "manufacturerAddress",
+          "label": "Manufacturer Complete Postal Address",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No manufacturer postal address found in OCR.",
+          "legalReference": "Rule 6(1)(a)",
+          "description": "Complete physical postal address with PIN code"
+        },
+        "countryOfOrigin": {
+          "fieldName": "countryOfOrigin",
+          "label": "Country of Origin",
+          "value": "India",
+          "status": "DETECTED",
+          "confidence": 98,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"India\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "legalReference": "Rule 6(1)(a) & Rule 27",
+          "description": "Nation of manufacture or assembly"
+        },
+        "netQuantity": {
+          "fieldName": "netQuantity",
+          "label": "Net Quantity Declaration",
+          "value": "200 G",
+          "status": "DETECTED",
+          "confidence": 99,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"200 g\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Selected '200 G' (Confidence: 99%). Found directly with Net Quantity / Count anchor keyword",
+          "candidates": [
+            {
+              "rawSnippet": "200 g",
+              "normalizedValue": "200 G",
+              "confidence": 99,
+              "matchedAnchor": "NET_QTY_ANCHOR",
+              "reason": "Found directly with Net Quantity / Count anchor keyword",
+              "isSelected": true
+            }
+          ],
+          "legalReference": "Rule 6(1)(c) & Rule 11",
+          "description": "Stated quantity of package contents"
+        },
+        "netQuantityUnit": {
+          "fieldName": "netQuantityUnit",
+          "label": "Net Quantity Unit",
+          "value": "G",
+          "status": "DETECTED",
+          "confidence": 99,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"200 g\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Selected 'G' (Confidence: 99%). Found directly with Net Quantity / Count anchor keyword",
+          "candidates": [
+            {
+              "rawSnippet": "200 g",
+              "normalizedValue": "200 G",
+              "confidence": 99,
+              "matchedAnchor": "NET_QTY_ANCHOR",
+              "reason": "Found directly with Net Quantity / Count anchor keyword",
+              "isSelected": true
+            }
+          ],
+          "legalReference": "Rule 13",
+          "description": "Standard SI metric / count unit (Pair, Piece, Unit, g, kg, ml, l)"
+        },
+        "netQuantityValue": {
+          "fieldName": "netQuantityValue",
+          "label": "Net Quantity Numerical Value",
+          "value": "200",
+          "status": "DETECTED",
+          "confidence": 99,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"200 g\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Selected '200' (Confidence: 99%). Found directly with Net Quantity / Count anchor keyword",
+          "candidates": [
+            {
+              "rawSnippet": "200 g",
+              "normalizedValue": "200 G",
+              "confidence": 99,
+              "matchedAnchor": "NET_QTY_ANCHOR",
+              "reason": "Found directly with Net Quantity / Count anchor keyword",
+              "isSelected": true
+            }
+          ],
+          "legalReference": "Rule 11",
+          "description": "Numerical metric measurement"
+        },
+        "mrp": {
+          "fieldName": "mrp",
+          "label": "Maximum Retail Price (MRP)",
+          "value": "₹ 150.00",
+          "status": "DETECTED",
+          "confidence": 99,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"MRP Rs. 150\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Selected candidate '₹ 150.00' (Confidence: 99%). Reason: Matched retail price with mandatory tax declaration: '₹ 150.00'",
+          "candidates": [
+            {
+              "rawSnippet": "MRP Rs. 150",
+              "normalizedValue": "₹ 150.00",
+              "confidence": 99,
+              "matchedAnchor": "Maximum Retail Price",
+              "reason": "Matched retail price with mandatory tax declaration: '₹ 150.00'",
+              "isSelected": true
+            },
+            {
+              "rawSnippet": "Rs. 150.00",
+              "normalizedValue": "₹ 150.00",
+              "confidence": 99,
+              "matchedAnchor": "MRP",
+              "reason": "Matched in direct proximity to 'MRP' / 'Maximum Retail Price' anchor; Matched explicit currency symbol (₹, Rs)",
+              "isSelected": false
+            },
+            {
+              "rawSnippet": "200",
+              "normalizedValue": "₹ 200.00",
+              "confidence": 85,
+              "reason": "",
+              "isSelected": false
+            },
+            {
+              "rawSnippet": "03",
+              "normalizedValue": "₹ 3.00",
+              "confidence": 45,
+              "reason": "Demoted: Single digit without currency symbol or decimals",
+              "isSelected": false
+            },
+            {
+              "rawSnippet": "2024",
+              "normalizedValue": "₹ 2,024.00",
+              "confidence": 15,
+              "reason": "Rejected: Number matches a year/date format (e.g. 2024-2026)",
+              "isSelected": false
+            }
+          ],
+          "legalReference": "Rule 6(1)(e) & Rule 2(m)",
+          "description": "Retail price in Indian Rupees"
+        },
+        "mrpInclusiveTaxes": {
+          "fieldName": "mrpInclusiveTaxes",
+          "label": "MRP Tax Inclusivity Declaration",
+          "value": "Declared (inclusive of all taxes)",
+          "status": "DETECTED",
+          "confidence": 98,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"Declared (inclusive of all taxes)\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "legalReference": "Rule 6(1)(e)",
+          "description": "Explicit statement 'inclusive of all taxes'"
+        },
+        "unitSalePrice": {
+          "fieldName": "unitSalePrice",
+          "label": "Unit Sale Price (USP)",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "legalReference": "Rule 6(1)(g)",
+          "description": "Price per unit weight/measure"
+        },
+        "manufacturingDate": {
+          "fieldName": "manufacturingDate",
+          "label": "Date of Manufacture / Packing",
+          "value": "03/2024",
+          "status": "DETECTED",
+          "confidence": 94,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"Mfg Date: 03/2024\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Found manufacturing date '03/2024' near MFD/PKD anchor",
+          "candidates": [
+            {
+              "rawSnippet": "Mfg Date: 03/2024",
+              "normalizedValue": "03/2024",
+              "confidence": 94,
+              "matchedAnchor": "Mfg Date",
+              "reason": "Found manufacturing date '03/2024' near MFD/PKD anchor",
+              "isSelected": true
+            }
+          ],
+          "legalReference": "Rule 6(1)(d)",
+          "description": "Month and year of manufacture or packaging"
+        },
+        "packagingDate": {
+          "fieldName": "manufacturingDate",
+          "label": "Date of Manufacture / Packing",
+          "value": "03/2024",
+          "status": "DETECTED",
+          "confidence": 94,
+          "isUserCorrected": false,
+          "sourceTextSnippet": "Snippet: \"Mfg Date: 03/2024\"",
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "Found manufacturing date '03/2024' near MFD/PKD anchor",
+          "candidates": [
+            {
+              "rawSnippet": "Mfg Date: 03/2024",
+              "normalizedValue": "03/2024",
+              "confidence": 94,
+              "matchedAnchor": "Mfg Date",
+              "reason": "Found manufacturing date '03/2024' near MFD/PKD anchor",
+              "isSelected": true
+            }
+          ],
+          "legalReference": "Rule 6(1)(d)",
+          "description": "Month and year of manufacture or packaging"
+        },
+        "expiryDate": {
+          "fieldName": "expiryDate",
+          "label": "Expiry / Best Before Date",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No expiry or best before date detected in OCR.",
+          "candidates": [],
+          "legalReference": "Rule 10 & FSSAI Standards",
+          "description": "Best before or expiry timeframe"
+        },
+        "consumerCareName": {
+          "fieldName": "consumerCareName",
+          "label": "Consumer Care Officer / Cell",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "legalReference": "Rule 6(1)(f)",
+          "description": "Contact person or department for customer grievances"
+        },
+        "consumerCareAddress": {
+          "fieldName": "manufacturerAddress",
+          "label": "Manufacturer Complete Postal Address",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No manufacturer postal address found in OCR.",
+          "legalReference": "Rule 6(1)(a)",
+          "description": "Complete physical postal address with PIN code"
+        },
+        "consumerCarePhone": {
+          "fieldName": "consumerCarePhone",
+          "label": "Consumer Care Phone / Helpline",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No customer care helpline number found in OCR.",
+          "legalReference": "Rule 6(1)(f)",
+          "description": "Telephone or toll-free helpline number"
+        },
+        "consumerCareEmail": {
+          "fieldName": "consumerCareEmail",
+          "label": "Consumer Care Email Address",
+          "value": null,
+          "status": "MISSING",
+          "confidence": 0,
+          "isUserCorrected": false,
+          "extractionMethod": "CONTEXTUAL_PARSER",
+          "reasonForSelection": "No customer grievance email address found in OCR.",
+          "legalReference": "Rule 6(1)(f)",
+          "description": "Email address for customer grievances"
+        },
+        "otherDeclarations": []
+      },
+      "complianceResult": {
+        "id": "fc8e79b5-f6bc-4f42-84fa-f025c20f3b9a",
+        "analysisId": "314410f6-5fdb-4017-bc06-6fca942bbf8d",
+        "overallStatus": "NON_COMPLIANT",
+        "complianceScore": 52,
+        "totalRulesEvaluated": 10,
+        "passedRulesCount": 6,
+        "failedRulesCount": 2,
+        "warningRulesCount": 2,
+        "assessedAt": "2026-08-24T18:57:05.489Z",
+        "violations": [
+          {
+            "id": "bf17a7f3-0ea6-4da8-abbf-e3abcd3720fc",
+            "ruleId": "RULE_MFR_ADDRESS",
+            "ruleCode": "LMPC-R6-1A-MFR",
+            "ruleName": "Manufacturer / Packer / Importer Name & Complete Postal Address",
+            "category": "MANUFACTURER",
+            "status": "VIOLATION",
+            "severity": "CRITICAL",
+            "detectedValue": null,
+            "expectedRequirement": "Name and complete physical address of the manufacturer/packer/importer including city, state, and 6-digit postal PIN code.",
+            "legalExplanation": "Rule 6(1)(a) requires that every package shall bear the name and complete address of the manufacturer or packer. Failure to declare this is a severe violation under Section 36 of the Legal Metrology Act, 2009.",
+            "recommendedCorrection": "Add explicit declaration: 'Manufactured and Packed by: [Full Registered Business Name], [Street/Plot Address], [City], [State] - [PIN Code]'.",
+            "statutoryReference": "Rule 6(1)(a), Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "0507726f-26d4-4ebb-91fb-8208534f23b0",
+            "ruleId": "RULE_COUNTRY_OF_ORIGIN",
+            "ruleCode": "LMPC-R6-1A-COO",
+            "ruleName": "Country of Origin Declaration",
+            "category": "IDENTITY",
+            "status": "PASS",
+            "severity": "INFO",
+            "detectedValue": "India",
+            "expectedRequirement": "Country of Origin declaration.",
+            "legalExplanation": "Complies with statutory origin declaration requirements.",
+            "recommendedCorrection": "Keep clearly visible.",
+            "statutoryReference": "Rule 6(1)(a) & Rule 27, Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "639e4cd6-2ffe-4b9c-8bec-6e816261b585",
+            "ruleId": "RULE_GENERIC_NAME",
+            "ruleCode": "LMPC-R6-1B-GEN",
+            "ruleName": "Generic or Common Name of Commodity",
+            "category": "IDENTITY",
+            "status": "PASS",
+            "severity": "INFO",
+            "detectedValue": "Country of Origin",
+            "expectedRequirement": "Generic or common commodity name.",
+            "legalExplanation": "Complies with Rule 6(1)(b).",
+            "recommendedCorrection": "Ensure generic name font size meets principal display panel requirements under Rule 7.",
+            "statutoryReference": "Rule 6(1)(b), Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "d00b9456-6302-4d0b-8e68-6ee041dc4050",
+            "ruleId": "RULE_NET_QUANTITY_STANDARD_UNITS",
+            "ruleCode": "LMPC-R6-1C-QTY",
+            "ruleName": "Net Quantity in Standard SI Metric Units",
+            "category": "QUANTITY",
+            "status": "PASS",
+            "severity": "INFO",
+            "detectedValue": "200 G",
+            "expectedRequirement": "Standard SI metric unit quantity declaration.",
+            "legalExplanation": "Complies with Rule 6(1)(c) and Rule 13.",
+            "recommendedCorrection": "Verify font height complies with Table under Rule 7 based on net weight.",
+            "statutoryReference": "Rule 6(1)(c) & Rules 11, 12, 13, Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "bcdf37e2-e3ad-417a-b9f3-ec57d779ee20",
+            "ruleId": "RULE_MANUFACTURING_PACKING_DATE",
+            "ruleCode": "LMPC-R6-1D-DATE",
+            "ruleName": "Month and Year of Manufacture / Packaging / Import",
+            "category": "DATES",
+            "status": "PASS",
+            "severity": "INFO",
+            "detectedValue": "03/2024",
+            "expectedRequirement": "Month and Year of manufacture or packing.",
+            "legalExplanation": "Complies with Rule 6(1)(d).",
+            "recommendedCorrection": "Keep format consistent across batch printing.",
+            "statutoryReference": "Rule 6(1)(d), Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "7924f1fb-e777-4536-b54e-5d5ccc815d65",
+            "ruleId": "RULE_MRP_INCLUSIVE_TAXES",
+            "ruleCode": "LMPC-R6-1E-MRP",
+            "ruleName": "Maximum Retail Price (MRP) with Mandatory Tax Inclusivity Statement",
+            "category": "PRICING",
+            "status": "PASS",
+            "severity": "INFO",
+            "detectedValue": "₹ 150.00 (incl. of all taxes)",
+            "expectedRequirement": "MRP with statutory tax inclusivity statement.",
+            "legalExplanation": "Complies with Rule 6(1)(e) and Rule 2(m).",
+            "recommendedCorrection": "Ensure no stickers are used to alter printed MRP.",
+            "statutoryReference": "Rule 6(1)(e) & Rule 2(m), Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "c0ad3af8-e4ed-48c5-86c3-26303fdd4499",
+            "ruleId": "RULE_UNIT_SALE_PRICE",
+            "ruleCode": "LMPC-R6-1G-USP",
+            "ruleName": "Unit Sale Price (USP) Declaration",
+            "category": "PRICING",
+            "status": "WARNING",
+            "severity": "MEDIUM",
+            "detectedValue": null,
+            "expectedRequirement": "Unit Sale Price (e.g. '₹ 0.50 / g' or '₹ 20.00 / 100ml' or '₹ 10.00 / N').",
+            "legalExplanation": "Under the 2021/2022 Legal Metrology (Packaged Commodities) Amendment, packages containing more than 1 kg / 1 L or multi-piece items must declare the Unit Sale Price.",
+            "recommendedCorrection": "Calculate and add: 'Unit Sale Price: ₹ X.XX per g / ml / unit' rounded to 2 decimal places.",
+            "statutoryReference": "Rule 6(1)(g), LMPC (Amendment) Rules, 2021/2022"
+          },
+          {
+            "id": "8c067f9b-f1e5-42c0-8f9e-8cdbc8ee9a26",
+            "ruleId": "RULE_CONSUMER_CARE_DETAILS",
+            "ruleCode": "LMPC-R6-1F-CARE",
+            "ruleName": "Consumer Care Contact Information",
+            "category": "CONSUMER_CARE",
+            "status": "VIOLATION",
+            "severity": "HIGH",
+            "detectedValue": null,
+            "expectedRequirement": "Consumer care details: designated person/cell, postal address, telephone/toll-free number, and email ID.",
+            "legalExplanation": "Rule 6(1)(f) requires consumer care contact details to enable direct redressal of consumer grievances.",
+            "recommendedCorrection": "Add: 'For Consumer Feedback/Complaints: Contact Customer Care Executive at [Address], Tel: [Phone/Helpline], Email: [Email]'.",
+            "statutoryReference": "Rule 6(1)(f), Legal Metrology (Packaged Commodities) Rules, 2011"
+          },
+          {
+            "id": "b2b08dd6-9e97-410f-86fb-69d0e7bc92d8",
+            "ruleId": "RULE_EXPIRY_BEST_BEFORE",
+            "ruleCode": "LMPC-R10-EXP",
+            "ruleName": "Best Before / Expiry Date (Consumable & Perishable Goods)",
+            "category": "DATES",
+            "status": "WARNING",
+            "severity": "LOW",
+            "detectedValue": null,
+            "expectedRequirement": "Best Before / Use By declaration for perishable or consumable commodities.",
+            "legalExplanation": "While non-perishable hardware/durables may be exempt, consumable or cosmetic products require clear expiry/best before dates.",
+            "recommendedCorrection": "If this product is consumable or perishable, declare: 'Best Before [X] months from packaging' or 'Expiry: MM/YYYY'.",
+            "statutoryReference": "Rule 10, Legal Metrology (Packaged Commodities) Rules & Food Safety Standards"
+          },
+          {
+            "id": "a9640d71-5e9b-4c58-94ff-7886bcd67eee",
+            "ruleId": "RULE_DUAL_MRP_PROHIBITION",
+            "ruleCode": "LMPC-R18-DUAL",
+            "ruleName": "Prohibition of Dual MRP & Price Overwriting",
+            "category": "PRICING",
+            "status": "PASS",
+            "severity": "INFO",
+            "detectedValue": "Single MRP detected",
+            "expectedRequirement": "Prohibition of Dual MRP.",
+            "legalExplanation": "Complies with Rule 18.",
+            "recommendedCorrection": "Maintain single pricing.",
+            "statutoryReference": "Rule 18(1) & 18(2), Legal Metrology (Packaged Commodities) Rules, 2011"
+          }
+        ],
+        "summaryNote": "### Legal Metrology Regulatory Notice & Rectification Advice for **Screenshot 2026 08 21 At 3.45.35 PM**\n\n**Overall Risk Level:** NON_COMPLIANT (Statutory Compliance Rating: 52%)\n\n**Key Statutory Non-Compliances Identified:**\n1. **Manufacturer / Packer / Importer Name & Complete Postal Address** (Rule 6(1)(a), Legal Metrology (Packaged Commodities) Rules, 2011): Rule 6(1)(a) requires that every package shall bear the name and complete address of the manufacturer or packer. Failure to declare this is a severe violation under Section 36 of the Legal Metrology Act, 2009.\n   - **Action Required:** Add explicit declaration: 'Manufactured and Packed by: [Full Registered Business Name], [Street/Plot Address], [City], [State] - [PIN Code]'.\n\n2. **Unit Sale Price (USP) Declaration** (Rule 6(1)(g), LMPC (Amendment) Rules, 2021/2022): Under the 2021/2022 Legal Metrology (Packaged Commodities) Amendment, packages containing more than 1 kg / 1 L or multi-piece items must declare the Unit Sale Price.\n   - **Action Required:** Calculate and add: 'Unit Sale Price: ₹ X.XX per g / ml / unit' rounded to 2 decimal places.\n\n3. **Consumer Care Contact Information** (Rule 6(1)(f), Legal Metrology (Packaged Commodities) Rules, 2011): Rule 6(1)(f) requires consumer care contact details to enable direct redressal of consumer grievances.\n   - **Action Required:** Add: 'For Consumer Feedback/Complaints: Contact Customer Care Executive at [Address], Tel: [Phone/Helpline], Email: [Email]'.\n\n4. **Best Before / Expiry Date (Consumable & Perishable Goods)** (Rule 10, Legal Metrology (Packaged Commodities) Rules & Food Safety Standards): While non-perishable hardware/durables may be exempt, consumable or cosmetic products require clear expiry/best before dates.\n   - **Action Required:** If this product is consumable or perishable, declare: 'Best Before [X] months from packaging' or 'Expiry: MM/YYYY'.\n\n---\n*Notice: Under Section 36 of the Legal Metrology Act, 2009, manufacturing, packing, or selling non-compliant packaged commodities carries penalties starting from ₹25,000 up to ₹1,00,000 or imprisonment for repeat violations. Rectify the above declarations before commercial batch release.*"
+      }
     }
   },
   "users": {}
