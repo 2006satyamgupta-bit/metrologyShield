@@ -97,11 +97,18 @@ export class OcrService {
       // Direct in-process Tesseract execution using local trained weights
       const langPath = path.join(process.cwd(), "public");
       const hasLocalTessdata = fs.existsSync(path.join(langPath, "eng.traineddata"));
+      const workerScriptPath = path.join(process.cwd(), "node_modules", "tesseract.js", "src", "worker-script", "node", "index.js");
+      const hasWorkerScript = fs.existsSync(workerScriptPath);
 
       const recognizePromise = (async (): Promise<OcrResult> => {
-        const res = await Tesseract.recognize(imageFilePath, "eng", {
+        const options: any = {
           langPath: hasLocalTessdata ? langPath : undefined,
-        });
+        };
+        if (hasWorkerScript) {
+          options.workerPath = workerScriptPath;
+        }
+
+        const res = await Tesseract.recognize(imageFilePath, "eng", options);
 
         const pageData = res.data as any;
         const rawText = (pageData.text || "").trim();
