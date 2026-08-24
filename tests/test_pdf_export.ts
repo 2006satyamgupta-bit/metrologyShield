@@ -28,7 +28,7 @@ Customer Care: Ph 080-46465500, Email: feedback@arvindfashions.com
     id: "test-pdf-12345-67890",
     userId: "default-user",
     productName: "USPA Men's Shoes",
-    status: "COMPLIANT",
+    status: "COMPLETED",
     complianceScore: mockCompliance.complianceScore,
     complianceStatus: mockCompliance.overallStatus,
     createdAt: new Date().toISOString(),
