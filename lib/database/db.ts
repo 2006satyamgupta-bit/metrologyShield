@@ -13,40 +13,81 @@ import {
   ComplianceStatus,
 } from "@/types";
 
+import os from "os";
+
 const LOCAL_DB_DIR = path.join(process.cwd(), ".data");
 const LOCAL_DB_FILE = path.join(LOCAL_DB_DIR, "analyses_db.json");
+const TMP_DB_FILE = path.join(os.tmpdir(), "metroshield_analyses_db.json");
 
 interface LocalDbSchema {
   analyses: Record<string, AnalysisRecord>;
   users: Record<string, { id: string; email: string; fullName: string }>;
 }
 
+let inMemoryDb: LocalDbSchema | null = null;
+
 function ensureLocalDb(): LocalDbSchema {
-  try {
-    if (!fs.existsSync(LOCAL_DB_DIR)) {
-      fs.mkdirSync(LOCAL_DB_DIR, { recursive: true });
-    }
-    if (!fs.existsSync(LOCAL_DB_FILE)) {
-      const initial: LocalDbSchema = { analyses: {}, users: {} };
-      fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(initial, null, 2), "utf-8");
-      return initial;
-    }
-    const content = fs.readFileSync(LOCAL_DB_FILE, "utf-8");
-    return JSON.parse(content);
-  } catch (err) {
-    console.error("Local DB read error, resetting:", err);
-    return { analyses: {}, users: {} };
+  if (inMemoryDb && Object.keys(inMemoryDb.analyses).length > 0) {
+    return inMemoryDb;
   }
+
+  let dbData: LocalDbSchema = { analyses: {}, users: {} };
+
+  // 1. Try reading from bundled project file (.data/analyses_db.json)
+  try {
+    if (fs.existsSync(LOCAL_DB_FILE)) {
+      const content = fs.readFileSync(LOCAL_DB_FILE, "utf-8");
+      const parsed = JSON.parse(content);
+      if (parsed && typeof parsed === "object") {
+        dbData = {
+          analyses: { ...dbData.analyses, ...(parsed.analyses || {}) },
+          users: { ...dbData.users, ...(parsed.users || {}) },
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Could not read bundled DB file:", err);
+  }
+
+  // 2. Try overlaying data from temp writable file (/tmp/metroshield_analyses_db.json)
+  try {
+    if (fs.existsSync(TMP_DB_FILE)) {
+      const tmpContent = fs.readFileSync(TMP_DB_FILE, "utf-8");
+      const tmpParsed = JSON.parse(tmpContent);
+      if (tmpParsed && typeof tmpParsed === "object") {
+        dbData = {
+          analyses: { ...dbData.analyses, ...(tmpParsed.analyses || {}) },
+          users: { ...dbData.users, ...(tmpParsed.users || {}) },
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Could not read tmp DB file:", err);
+  }
+
+  inMemoryDb = dbData;
+  return inMemoryDb;
 }
 
 function saveLocalDb(data: LocalDbSchema) {
+  inMemoryDb = data;
+
+  // Try saving to .data if writable (local dev)
   try {
     if (!fs.existsSync(LOCAL_DB_DIR)) {
       fs.mkdirSync(LOCAL_DB_DIR, { recursive: true });
     }
     fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+    return;
+  } catch {
+    // Expected on read-only environments like Vercel Lambda
+  }
+
+  // Fallback to saving in /tmp for serverless persistence
+  try {
+    fs.writeFileSync(TMP_DB_FILE, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
-    console.error("Local DB write error:", err);
+    console.warn("Local tmp DB write error, preserved in-memory:", err);
   }
 }
 

@@ -28,6 +28,7 @@ import {
   ProductCategory,
 } from "@/types";
 import { PdfAuditGenerator } from "@/lib/utils/pdfGenerator";
+import { RegexPatternExtractor } from "@/services/ai/regexExtractor";
 
 interface ExtractedDataReviewProps {
   analysis: AnalysisRecord;
@@ -40,8 +41,15 @@ export const ExtractedDataReview: React.FC<ExtractedDataReviewProps> = ({
   onSaveAndEvaluate,
   isLoading,
 }) => {
-  const initialFields = analysis.extractedFields;
-  const [fields, setFields] = useState<ExtractedProductDeclarations | null>(initialFields || null);
+  const initialFields =
+    analysis.extractedFields ||
+    (analysis.ocrResult?.rawText
+      ? RegexPatternExtractor.extractDeclarationsFromText(
+          analysis.ocrResult.rawText,
+          analysis.ocrResult.lines
+        )
+      : RegexPatternExtractor.extractDeclarationsFromText(""));
+  const [fields, setFields] = useState<ExtractedProductDeclarations | null>(initialFields);
   const [isRawOcrModalOpen, setIsRawOcrModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "detected" | "review" | "missing" | "not_applicable">("all");

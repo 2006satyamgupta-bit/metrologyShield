@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { v4 as uuidv4 } from "uuid";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { UploadedLabel } from "@/types";
@@ -83,17 +84,33 @@ export class StorageService {
       }
     }
 
-    // Always ensure local file is written so OCR and client preview work reliably
-    if (!fs.existsSync(this.localUploadDir)) {
-      fs.mkdirSync(this.localUploadDir, { recursive: true });
-    }
-
+    // Try writing to public/uploads (local dev) or os.tmpdir() (serverless)
     const localFileName = `${analysisId}-${fileId}${extension}`;
-    const localFilePath = path.join(this.localUploadDir, localFileName);
-    fs.writeFileSync(localFilePath, buffer);
+    try {
+      if (!fs.existsSync(this.localUploadDir)) {
+        fs.mkdirSync(this.localUploadDir, { recursive: true });
+      }
+      const localFilePath = path.join(this.localUploadDir, localFileName);
+      fs.writeFileSync(localFilePath, buffer);
+      if (!url) {
+        url = `/uploads/${localFileName}`;
+      }
+    } catch {
+      // Serverless read-only filesystem: write to os.tmpdir() and use Data URL
+      try {
+        const tmpDir = path.join(os.tmpdir(), "metroshield_uploads");
+        if (!fs.existsSync(tmpDir)) {
+          fs.mkdirSync(tmpDir, { recursive: true });
+        }
+        const tmpFilePath = path.join(tmpDir, localFileName);
+        fs.writeFileSync(tmpFilePath, buffer);
+      } catch {
+        // Ignore tmp write errors
+      }
 
-    if (!url) {
-      url = `/uploads/${localFileName}`;
+      if (!url) {
+        url = `data:${mimeType};base64,${buffer.toString("base64")}`;
+      }
     }
 
     const uploadedLabel: UploadedLabel = {
@@ -115,6 +132,8 @@ export class StorageService {
       const fileName = urlOrPath.replace("/uploads/", "");
       const fullPath = path.join(this.localUploadDir, fileName);
       if (fs.existsSync(fullPath)) return fullPath;
+      const tmpPath = path.join(os.tmpdir(), "metroshield_uploads", fileName);
+      if (fs.existsSync(tmpPath)) return tmpPath;
     }
     return null;
   }
