@@ -67,7 +67,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({
       const url = URL.createObjectURL(file);
       img.onload = () => {
         URL.revokeObjectURL(url);
-        const maxDim = 1600;
+        const maxDim = 1200;
         let width = img.width;
         let height = img.height;
 
@@ -110,7 +110,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({
             resolve(optimized);
           },
           "image/jpeg",
-          0.92
+          0.88
         );
       };
       img.onerror = () => resolve(file);
